@@ -28,23 +28,20 @@ services:
       interval: 35s
       timeout: 20s
       retries: 5
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
       - api
 
   flyway:
     image: flyway/flyway
-    command: migrate
     environment:
       - FLYWAY_USER=payroll
       - FLYWAY_PASSWORD=payroll
-      - FLYWAY_URL=jdbc:postgresql://172.27.0.3:5432/payroll
-      - FLYWAY_SCHEMAS=payroll
+      - FLYWAY_URL=jdbc:postgresql://db:5432/payroll
+      - FLYWAY_SCHEMAS=flyway,payroll
       - FLYWAY_GROUP=true
     volumes:
-#      - ${PWD}/src/main/resources/db:/flyway/conf
       - ${PWD}/src/main/resources/db/migration:/flyway/sql
+    command: -locations=filesystem:/flyway/sql -connectRetries=60 migrate
     depends_on:
       - db
     networks:
